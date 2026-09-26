@@ -43,7 +43,7 @@ jobs:
         shell: bash
         run: |
           keytool -genkeypair -v -keystore android/havenmc-ci-release.keystore \
-            -storepass havenmc-ci-store-password -keypass havenmc-ci-key-password \
+            -storepass havenmc-ci-store-password -keypass havenmc-ci-store-password \
             -alias havenmc -keyalg RSA -keysize 2048 -validity 10000 \
             -dname "CN=HavenMC, OU=Launcher, O=HavenMC, L=Internet, ST=Internet, C=TR"
       - name: Build signed release APK

@@ -18,7 +18,7 @@ text = text.replace(
             storeFile file("../havenmc-ci-release.keystore")
             storePassword "havenmc-ci-store-password"
             keyAlias "havenmc"
-            keyPassword "havenmc-ci-key-password"
+            keyPassword "havenmc-ci-store-password"
         }
     }
     buildTypes {''',
