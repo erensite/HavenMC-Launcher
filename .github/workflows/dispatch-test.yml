@@ -1,9 +1,0 @@
-name: HavenMC Trigger Test
-on:
-  workflow_dispatch:
-    inputs: {}
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo workflow-dispatch-ok
