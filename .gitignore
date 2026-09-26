@@ -1,0 +1,7 @@
+node_modules/
+android/
+src-tauri/target/
+.DS_Store
+.env
+*.keystore
+*.jks

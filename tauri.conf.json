@@ -1,0 +1,15 @@
+{
+  "build": {"distDir": "src", "devPath": "src"},
+  "package": {"productName": "HavenMC Launcher", "version": "1.0.0"},
+  "tauri": {
+    "allowlist": {"all": false, "shell": {"all": false, "open": true}},
+    "bundle": {
+      "active": true,
+      "targets": ["nsis"],
+      "identifier": "live.havenmc.launcher",
+      "icon": ["src/havenmc-logo.png"],
+      "windows": {"webviewInstallMode": {"type": "embedBootstrapper"}}
+    },
+    "windows": [{"title": "HavenMC Launcher", "width": 1100, "height": 720, "resizable": true, "fullscreen": false}]
+  }
+}

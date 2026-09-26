@@ -1,0 +1,6 @@
+{
+  "name":"havenmc-launcher","version":"1.1.0","private":true,"description":"Open-source HavenMC Minecraft launcher for Windows and Android",
+  "scripts":{"tauri":"tauri","android:add":"cap add android","android:sync":"cap sync android","android:open":"cap open android"},
+  "dependencies":{"@capacitor/android":"6.2.2","@capacitor/core":"6.2.2"},
+  "devDependencies":{"@capacitor/cli":"6.2.2","@tauri-apps/cli":"1.6.3","typescript":"5.6.3"}
+}
