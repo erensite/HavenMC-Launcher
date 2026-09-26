@@ -38,8 +38,61 @@ jobs:
       - run: npm ci
       - run: npx cap add android
       - run: npx cap sync android
-      - run: chmod +x android/gradlew && cd android && ./gradlew assembleRelease
-      - run: cp android/app/build/outputs/apk/release/app-release-unsigned.apk HavenMC-Launcher.apk
+      - name: Configure Android 7+ and device ABIs
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/variables.gradle')
+          s = p.read_text().replace('minSdkVersion = 22', 'minSdkVersion = 24')
+          p.write_text(s)
+          p = Path('android/app/build.gradle')
+          s = p.read_text()
+          s = s.replace('targetSdkVersion rootProject.ext.targetSdkVersion\n', "targetSdkVersion rootProject.ext.targetSdkVersion\n        ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }\n")
+          s = s.replace('    buildTypes {', '''    signingConfigs {
+        release {
+            storeFile file("../havenmc-ci-release.keystore")
+            storePassword "havenmc-ci-store-password"
+            keyAlias "havenmc"
+            keyPassword "havenmc-ci-key-password"
+        }
+    }
+    buildTypes {''')
+          s = s.replace('        release {\n            minifyEnabled false', '        release {\n            signingConfig signingConfigs.release\n            minifyEnabled false')
+          p.write_text(s)
+          PY
+      - name: Create ephemeral release signing key
+        shell: bash
+        run: |
+          keytool -genkeypair -v -keystore android/havenmc-ci-release.keystore \
+            -storepass havenmc-ci-store-password -keypass havenmc-ci-key-password \
+            -alias havenmc -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=HavenMC, OU=Launcher, O=HavenMC, L=Internet, ST=Internet, C=TR"
+      - name: Build signed release APK
+        shell: bash
+        run: |
+          chmod +x android/gradlew
+          (cd android && ./gradlew --no-daemon clean assembleRelease)
+      - name: Verify installable APK
+        shell: bash
+        run: |
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          test -s "$APK"
+          unzip -tq "$APK"
+          unzip -l "$APK" | grep -q 'AndroidManifest.xml'
+          APKSIGNER="$ANDROID_HOME/build-tools/35.0.0/apksigner"
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | grep -q "package: name='live.havenmc.launcher'"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | grep -q "sdkVersion:'24'"
+          if unzip -l "$APK" | grep -q ' lib/'; then
+            unzip -l "$APK" | grep -q 'lib/arm64-v8a/'
+            unzip -l "$APK" | grep -q 'lib/armeabi-v7a/'
+          else
+            echo 'No native libraries: universal Java/WebView APK is ABI-independent and runs on arm64-v8a and armeabi-v7a.'
+          fi
+          cp "$APK" HavenMC-Launcher.apk
+          test "$(sha256sum "$APK" | cut -d' ' -f1)" = "$(sha256sum HavenMC-Launcher.apk | cut -d' ' -f1)"
       - uses: actions/upload-artifact@v4
         with: { name: HavenMC-Launcher-Android, path: HavenMC-Launcher.apk }
   release:
