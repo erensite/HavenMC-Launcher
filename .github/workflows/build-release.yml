@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-        with: { toolchain: 1.80.1, targets: x86_64-pc-windows-msvc }
+        with: { targets: x86_64-pc-windows-msvc }
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
